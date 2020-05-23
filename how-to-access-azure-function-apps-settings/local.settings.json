@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "ConfigKey1": "Value from Configuration file",
+    "Employee:FirstName": "Chandrashekhar",
+    "Employee:LastName": "Paliwal",
+    "Employee:City": "Mumbai"
+  }
+}
