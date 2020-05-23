@@ -8,13 +8,21 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace how_to_access_azure_function_apps_settings
 {
-    public static class Function1
+    public class Function1
     {
+        private readonly Employee _employee;
+
+        public Function1(IOptions<Employee> employee)
+        {
+            _employee = employee.Value;
+        }
+
         [FunctionName("Function1")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
@@ -35,7 +43,7 @@ namespace how_to_access_azure_function_apps_settings
 
 
         [FunctionName("UsingEnvironmentVariable")]
-        public static async Task<IActionResult> UsingEnvironmentVariable(
+        public async Task<IActionResult> UsingEnvironmentVariable(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
@@ -52,7 +60,7 @@ namespace how_to_access_azure_function_apps_settings
 
 
         [FunctionName("UsingConfigurationBuilder")]
-        public static async Task<IActionResult> UsingConfigurationBuilder(
+        public async Task<IActionResult> UsingConfigurationBuilder(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ExecutionContext context, // <- You'll need this to add the local.settings.json file for local execution
             ILogger log)
@@ -73,6 +81,21 @@ namespace how_to_access_azure_function_apps_settings
             string responseMessage = string.IsNullOrEmpty(value)
                 ? $"Failed!! The function app not able to find the value for provided Configuration key!!"
                 : $"Success !! {value}";
+
+            return new OkObjectResult(responseMessage);
+        }
+
+
+        [FunctionName("UsingOptions")]
+        public async Task<IActionResult> UsingOptions(
+                [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+                ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+            
+            string responseMessage = _employee == null
+                ? $"Failed!! The function app not able to find the value for provided Configuration key!!"
+                : $"Success !! {JsonConvert.SerializeObject(_employee)}";
 
             return new OkObjectResult(responseMessage);
         }
