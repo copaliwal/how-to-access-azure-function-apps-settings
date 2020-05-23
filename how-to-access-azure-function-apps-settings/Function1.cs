@@ -31,5 +31,21 @@ namespace how_to_access_azure_function_apps_settings
 
             return new OkObjectResult(responseMessage);
         }
+
+        [FunctionName("UsingEnvironmentVariable")]
+        public static async Task<IActionResult> UsingEnvironmentVariable(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            string value = Environment.GetEnvironmentVariable("ConfigKey1");
+
+            string responseMessage = string.IsNullOrEmpty(value)
+                ? $"Failed!! The function app not able to find the value for provided Configuration key!!"
+                : $"Success !! {value}";
+
+            return new OkObjectResult(responseMessage);
+        }
     }
 }
