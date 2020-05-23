@@ -7,6 +7,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace how_to_access_azure_function_apps_settings
 {
@@ -32,6 +33,7 @@ namespace how_to_access_azure_function_apps_settings
             return new OkObjectResult(responseMessage);
         }
 
+
         [FunctionName("UsingEnvironmentVariable")]
         public static async Task<IActionResult> UsingEnvironmentVariable(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
@@ -40,6 +42,33 @@ namespace how_to_access_azure_function_apps_settings
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             string value = Environment.GetEnvironmentVariable("ConfigKey1");
+
+            string responseMessage = string.IsNullOrEmpty(value)
+                ? $"Failed!! The function app not able to find the value for provided Configuration key!!"
+                : $"Success !! {value}";
+
+            return new OkObjectResult(responseMessage);
+        }
+
+
+        [FunctionName("UsingConfigurationBuilder")]
+        public static async Task<IActionResult> UsingConfigurationBuilder(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            ExecutionContext context, // <- You'll need this to add the local.settings.json file for local execution
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            var config = new ConfigurationBuilder()
+                                .SetBasePath(context.FunctionAppDirectory)
+                                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+                                .AddEnvironmentVariables()
+                                .Build();
+
+            var value = config["ConfigKey1"];
+
+            // To read Connection string from ConnectionString Section of settings file
+            //var connection = config.GetConnectionString("SqlConnectionString"); 
 
             string responseMessage = string.IsNullOrEmpty(value)
                 ? $"Failed!! The function app not able to find the value for provided Configuration key!!"
